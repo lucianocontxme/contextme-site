@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ContextMe — Sua tela direto para a IA</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0A0B;
+    --surface: #111114;
+    --surface2: #18181D;
+    --border: #2A2A35;
+    --accent: #E8FF47;
+    --accent2: #47C9FF;
+    --accent3: #FF6B35;
+    --text: #F0EFE8;
+    --muted: #7A7A8A;
+    --dim: #4A4A5A;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(10,10,11,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--accent); }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 14px;
+    color: var(--muted);
+    text-decoration: none;
+    font-weight: 400;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  .nav-cta {
+    background: var(--accent);
+    color: #0A0A0B !important;
+    font-weight: 600 !important;
+    padding: 9px 20px;
+    border-radius: 6px;
+    transition: opacity 0.2s !important;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(232,255,71,0.07) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 100px;
+    background: rgba(232,255,71,0.08);
+    border: 1px solid rgba(232,255,71,0.2);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    margin-bottom: 32px;
+    letter-spacing: 0.04em;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(42px, 7vw, 80px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    max-width: 900px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .hero h1 .accent { color: var(--accent); }
+  .hero h1 .accent2 { color: var(--accent2); }
+
+  .hero-sub {
+    font-size: clamp(16px, 2vw, 20px);
+    color: var(--muted);
+    max-width: 560px;
+    font-weight: 300;
+    line-height: 1.7;
+    margin-bottom: 48px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0A0A0B;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px 32px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: opacity 0.2s, transform 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .btn-secondary {
+    color: var(--muted);
+    font-size: 15px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+  }
+  .btn-secondary:hover { color: var(--text); }
+
+  .hero-ais {
+    margin-top: 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+
+  .hero-ais-label {
+    font-size: 12px;
+    color: var(--dim);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .ai-pills {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .ai-pill {
+    padding: 6px 14px;
+    border-radius: 100px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 400;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .ai-pill:hover { border-color: var(--dim); color: var(--text); }
+
+  /* ── SECTION COMMON ── */
+  section {
+    padding: 100px 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+
+  .section-sub {
+    font-size: 17px;
+    color: var(--muted);
+    font-weight: 300;
+    max-width: 520px;
+    line-height: 1.7;
+    margin-bottom: 56px;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .step {
+    background: var(--surface);
+    padding: 36px 32px;
+    position: relative;
+  }
+
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+  }
+
+  .step-icon {
+    font-size: 28px;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .step h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  .step p {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  .step-accent { border-top: 2px solid var(--accent); }
+  .step-accent2 { border-top: 2px solid var(--accent2); }
+  .step-accent3 { border-top: 2px solid var(--accent3); }
+
+  /* ── FEATURES ── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px 28px;
+    transition: border-color 0.2s;
+  }
+  .feature-card:hover { border-color: var(--dim); }
+
+  .feature-icon {
+    font-size: 24px;
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .feature-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .feature-card p {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.65;
+  }
+
+  .feature-tag {
+    display: inline-block;
+    margin-top: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(232,255,71,0.08);
+    border: 1px solid rgba(232,255,71,0.2);
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .feature-tag.blue {
+    background: rgba(71,201,255,0.08);
+    border-color: rgba(71,201,255,0.2);
+    color: var(--accent2);
+  }
+
+  /* ── COMPARISON ── */
+  .compare-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .compare-table th {
+    background: var(--surface2);
+    padding: 16px 20px;
+    text-align: left;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .compare-table th.highlight {
+    color: var(--accent);
+    background: rgba(232,255,71,0.06);
+  }
+
+  .compare-table td {
+    padding: 14px 20px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .compare-table tr:last-child td { border-bottom: none; }
+
+  .compare-table td.product-name {
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .compare-table td.contextme-col {
+    background: rgba(232,255,71,0.04);
+  }
+
+  .check { color: var(--accent); font-size: 16px; }
+  .cross { color: var(--dim); font-size: 16px; }
+  .partial { color: var(--muted); font-size: 13px; }
+
+  /* ── PRICING ── */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .pricing-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px 32px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pricing-card.featured {
+    border-color: var(--accent);
+    background: rgba(232,255,71,0.04);
+    position: relative;
+  }
+
+  .pricing-featured-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #0A0A0B;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 100px;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  .pricing-plan {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .pricing-price {
+    font-family: 'Syne', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .pricing-price small {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0;
+  }
+
+  .pricing-desc {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    margin-bottom: 28px;
+    margin-top: 6px;
+  }
+
+  .pricing-features {
+    list-style: none;
+    margin-bottom: 32px;
+    flex: 1;
+  }
+
+  .pricing-features li {
+    font-size: 14px;
+    color: var(--text);
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .pricing-features li:last-child { border-bottom: none; }
+
+  .pricing-features li .check { font-size: 14px; }
+
+  .pricing-cta {
+    background: var(--border);
+    color: var(--text);
+    text-align: center;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    transition: background 0.2s;
+    display: block;
+  }
+  .pricing-cta:hover { background: var(--dim); }
+
+  .pricing-cta.featured {
+    background: var(--accent);
+    color: #0A0A0B;
+  }
+  .pricing-cta.featured:hover { opacity: 0.88; background: var(--accent); }
+
+  /* ── CTA FINAL ── */
+  .cta-section {
+    text-align: center;
+    padding: 120px 24px;
+    position: relative;
+    overflow: hidden;
+    max-width: 100%;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(232,255,71,0.06) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .cta-section h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    margin-bottom: 20px;
+    line-height: 1.1;
+  }
+
+  .cta-section p {
+    font-size: 18px;
+    color: var(--muted);
+    font-weight: 300;
+    max-width: 480px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--dim);
+  }
+
+  footer a {
+    color: var(--dim);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  footer a:hover { color: var(--muted); }
+
+  .footer-links {
+    display: flex;
+    gap: 24px;
+  }
+
+  /* ── FULL-WIDTH DIVIDER ── */
+  .full-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── PRIVACY BADGE ── */
+  .privacy-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    padding: 20px 24px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .privacy-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .privacy-item span { font-size: 16px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    .steps { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    section { padding: 72px 20px; }
+    .compare-table th:nth-child(3), .compare-table td:nth-child(3) { display: none; }
+    .compare-table th:nth-child(4), .compare-table td:nth-child(4) { display: none; }
+    footer { flex-direction: column; gap: 16px; text-align: center; }
+    .privacy-strip { flex-direction: column; gap: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a href="#" class="nav-logo">Context<span>Me</span></a>
+  <ul class="nav-links">
+    <li><a href="#como-funciona">Como funciona</a></li>
+    <li><a href="#funcionalidades">Funcionalidades</a></li>
+    <li><a href="#comparativo">Comparativo</a></li>
+    <li><a href="#precos">Preços</a></li>
+    <li><a href="#download" class="nav-cta">Download grátis</a></li>
+  </ul>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-badge">
+    <div class="dot"></div>
+    v0.1.0 — disponível agora
+  </div>
+
+  <h1>
+    Sua tela direto<br>
+    para <span class="accent">qualquer IA</span>
+  </h1>
+
+  <p class="hero-sub">
+    Barrinha flutuante para Windows que captura o que você vê — screenshot, texto, voz, cliques — e envia automaticamente para Claude, ChatGPT, Gemini ou qualquer IA com campo de texto.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#download" class="btn-primary">
+      ↓ Baixar grátis para Windows
+    </a>
+    <a href="#como-funciona" class="btn-secondary">
+      Ver como funciona →
+    </a>
+  </div>
+
+  <div class="hero-ais">
+    <div class="hero-ais-label">Funciona com qualquer IA</div>
+    <div class="ai-pills">
+      <div class="ai-pill">Claude</div>
+      <div class="ai-pill">ChatGPT</div>
+      <div class="ai-pill">Gemini</div>
+      <div class="ai-pill">Copilot</div>
+      <div class="ai-pill">Grok</div>
+      <div class="ai-pill">+ qualquer outra</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PRIVACY STRIP ── -->
+<div class="privacy-strip">
+  <div class="privacy-item"><span>🔒</span> Tudo local — sem servidor</div>
+  <div class="privacy-item"><span>🎙️</span> Voz processada offline</div>
+  <div class="privacy-item"><span>👁️</span> Você controla o que é capturado</div>
+  <div class="privacy-item"><span>⚡</span> Sem assinatura para começar</div>
+</div>
+
+<!-- ── COMO FUNCIONA ── -->
+<section id="como-funciona">
+  <div class="section-label">Como funciona</div>
+  <h2 class="section-title">Três cliques.<br>A IA entende tudo.</h2>
+  <p class="section-sub">Sem copiar manualmente. Sem descrever o que está na tela. Sem alternar janelas.</p>
+
+  <div class="steps">
+    <div class="step step-accent">
+      <div class="step-num">01</div>
+      <span class="step-icon">📸</span>
+      <h3>Capture o contexto</h3>
+      <p>Screenshot, recorte com OCR, registro de clique com zoom, digitação ou voz — você escolhe o que a IA precisa ver.</p>
+    </div>
+    <div class="step step-accent2">
+      <div class="step-num">02</div>
+      <span class="step-icon">⚡</span>
+      <h3>Clique na barrinha</h3>
+      <p>A barrinha flutuante está sempre visível. Um clique envia tudo para o campo de texto da IA aberta no seu navegador.</p>
+    </div>
+    <div class="step step-accent3">
+      <div class="step-num">03</div>
+      <span class="step-icon">🤖</span>
+      <h3>Resposta precisa</h3>
+      <p>A IA recebe exatamente o que você vê. Diagnóstico de bug, análise de dashboard, resposta a e-mail — com contexto real.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── FUNCIONALIDADES ── -->
+<section id="funcionalidades">
+  <div class="section-label">Funcionalidades</div>
+  <h2 class="section-title">7 formas de dar<br>contexto à IA.</h2>
+  <p class="section-sub">Cada modalidade de captura foi construída para um caso de uso real.</p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-icon">🖥️</span>
+      <h3>Screenshot em resolução nativa</h3>
+      <p>Captura a tela completa em resolução nativa com suporte a múltiplos monitores. A IA vê exatamente o que você vê.</p>
+      <span class="feature-tag">multi-monitor</span>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">✂️</span>
+      <h3>Recorte livre com OCR</h3>
+      <p>Selecione qualquer região da tela. O Tesseract extrai o texto automaticamente — ideal para erros, tabelas e formulários.</p>
+      <span class="feature-tag">Tesseract OCR</span>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🖱️</span>
+      <h3>Registro de clique com zoom 4×</h3>
+      <p>Captura onde você clicou com zoom 4× no ponto exato. Perfeito para reportar bugs de UI com contexto visual preciso.</p>
+      <span class="feature-tag">zoom automático</span>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">⌨️</span>
+      <h3>Gravador de teclado</h3>
+      <p>Captura o que você digita via UI Automation — sem interceptar o sistema. A IA acompanha sua sequência de ações.</p>
+      <span class="feature-tag">UI Automation</span>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🎙️</span>
+      <h3>Voz offline com Whisper</h3>
+      <p>Transcrição de voz 100% local via OpenAI Whisper. Nenhum áudio sai do seu computador. Privacidade real.</p>
+      <span class="feature-tag blue">100% offline</span>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">📋</span>
+      <h3>Audit trail em JSON</h3>
+      <p>Cada sessão gera um log estruturado com par instrução→resposta, timestamps e metadados. Rastreabilidade nativa para compliance.</p>
+      <span class="feature-tag blue">EU AI Act Art. 12</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── COMPARATIVO ── -->
+<section id="comparativo">
+  <div class="section-label">Comparativo</div>
+  <h2 class="section-title">O único que combina<br>os quatro diferenciais.</h2>
+  <p class="section-sub">Agnóstico à IA. Agnóstico ao app. Controlado pelo usuário. Voz offline.</p>
+
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>Produto</th>
+        <th class="highlight">ContextMe</th>
+        <th>Microsoft Recall</th>
+        <th>Extensões de browser</th>
+        <th>Print manual</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="product-name">Funciona com qualquer IA</td>
+        <td class="contextme-col"><span class="check">✓</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="partial">parcial</span></td>
+        <td><span class="check">✓</span></td>
+      </tr>
+      <tr>
+        <td class="product-name">Captura ativa e controlada</td>
+        <td class="contextme-col"><span class="check">✓</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="partial">parcial</span></td>
+        <td><span class="check">✓</span></td>
+      </tr>
+      <tr>
+        <td class="product-name">Metadados estruturados (JSON)</td>
+        <td class="contextme-col"><span class="check">✓</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="cross">✗</span></td>
+      </tr>
+      <tr>
+        <td class="product-name">Voz offline</td>
+        <td class="contextme-col"><span class="check">✓</span></td>
+        <td><span class="check">✓</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="cross">✗</span></td>
+      </tr>
+      <tr>
+        <td class="product-name">Funciona fora do browser</td>
+        <td class="contextme-col"><span class="check">✓</span></td>
+        <td><span class="check">✓</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="check">✓</span></td>
+      </tr>
+      <tr>
+        <td class="product-name">Sem servidor / sem envio de dados</td>
+        <td class="contextme-col"><span class="check">✓</span></td>
+        <td><span class="check">✓</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="check">✓</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ── PRICING ── -->
+<section id="precos" style="text-align:center;">
+  <div class="section-label" style="display:inline-block;">Preços</div>
+  <h2 class="section-title">Comece grátis.<br>Evolua quando fizer sentido.</h2>
+  <p class="section-sub" style="margin:0 auto 56px;">Sem cartão de crédito para baixar. Sem surpresas.</p>
+
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="pricing-plan">Free</div>
+      <div class="pricing-price">R$ 0</div>
+      <div class="pricing-desc">Para sempre</div>
+      <ul class="pricing-features">
+        <li><span class="check">✓</span> Capturas ilimitadas</li>
+        <li><span class="check">✓</span> Screenshot, OCR, voz</li>
+        <li><span class="check">✓</span> Funciona com qualquer IA</li>
+        <li><span class="check">✓</span> 1 sessão ativa</li>
+        <li style="color: var(--dim);">— Histórico de sessões</li>
+        <li style="color: var(--dim);">— Templates salvos</li>
+        <li style="color: var(--dim);">— Audit trail JSON completo</li>
+      </ul>
+      <a href="#download" class="pricing-cta">Baixar grátis</a>
+    </div>
+
+    <div class="pricing-card featured">
+      <div class="pricing-featured-badge">EM BREVE</div>
+      <div class="pricing-plan">Pro</div>
+      <div class="pricing-price">R$ 19–29 <small>/mês</small></div>
+      <div class="pricing-desc">Para quem usa IA todo dia</div>
+      <ul class="pricing-features">
+        <li><span class="check">✓</span> Tudo do plano Free</li>
+        <li><span class="check">✓</span> Histórico completo de sessões</li>
+        <li><span class="check">✓</span> Templates salvos</li>
+        <li><span class="check">✓</span> Múltiplos destinos de envio</li>
+        <li><span class="check">✓</span> OCR avançado</li>
+        <li><span class="check">✓</span> Audit trail JSON contínuo</li>
+        <li><span class="check">✓</span> Suporte prioritário</li>
+      </ul>
+      <a href="#download" class="pricing-cta featured">Entrar na lista de espera</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA FINAL ── -->
+<div class="cta-section" id="download">
+  <h2>Dê contexto real<br>para a sua IA.</h2>
+  <p>Baixe agora. Instale em 2 minutos. Não requer Python.</p>
+  <a href="#" class="btn-primary" style="font-size:16px; padding:16px 40px;">
+    ↓ Download grátis para Windows
+  </a>
+  <p style="margin-top: 16px; font-size: 13px; color: var(--dim);">Windows 10/11 · v0.1.0 · Março 2026</p>
+</div>
+
+<!-- ── FOOTER ── -->
+<div class="full-divider"></div>
+<footer>
+  <div>
+    <a href="https://contx.me" style="font-family:'Syne',sans-serif; font-weight:700; font-size:15px; color: var(--muted);">Context<span style="color:var(--accent)">Me</span></a>
+  </div>
+  <div style="font-size: 12px; color: var(--dim);">© 2026 ContextMe · contx.me</div>
+  <div class="footer-links">
+    <a href="#">Termos de Uso</a>
+    <a href="#">Privacidade</a>
+    <a href="mailto:oi@contxme.com">Contato</a>
+  </div>
+</footer>
+
+</body>
+</html>
